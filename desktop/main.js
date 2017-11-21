@@ -30,13 +30,13 @@ let tray = null;
 let contextMenu = null;
 let windows = {};
 let totalCPUs = os.cpus().length;
-//let miner = new Miner();
-let miner = new GPUMiner();
+let miner = new Miner();
 let mySettings = {};
 
 let defaultSettings = {
   maxUsage: 10,
   autostart: true,
+  useGPU: false,
   pauseOnLowPower: true,
   uuid: undefined,
   timesRun: 0,
@@ -128,22 +128,29 @@ function getSettings() {
 }
 
 function updateSettings(newSettings) {
-  if (newSettings.useGPU) {
-    if (newSettings.useGPU != mySettings.useGPU) {
-      /* switch to GPU mode */
-      miner.stop();
-      miner = new GPUMiner();
-      miner.start();
-    }
-  } else {
-    if (newSettings.useGPU != mySettings.useGPU) {
+
+  if ("useGPU" in newSettings) {
+    if (newSettings.useGPU) {
+      if (newSettings.useGPU != mySettings.useGPU) {
+        /* switch to GPU mode */
+        miner.stop();
+        miner = new GPUMiner();
+        miner.start();
+      }
+    } else if (newSettings.useGPU != mySettings.useGPU) {
+      /* switch off gpu mode */
       miner.stop();
       miner = new Miner();
-      miner.updateArgs({ "--max-cpu-usage": newSettings.maxUsage });
+      miner.updateArgs({'--max-cpu-usage': newSettings.maxUsage});
       miner.start();
-    } else if (newSettings.maxUsage && newSettings.maxUsage != mySettings.maxUsage) {
-      /* may need to switch intensity */
-      miner.updateArgs({ "--max-cpu-usage": newSettings.maxUsage });
+    }
+  }
+
+  if ("maxUsage" in newSettings) {
+    if (newSettings.maxUsage != mySettings.maxUsage) {
+      miner.updateArgs({"--max-cpu-usage": newSettings.maxUsage});
+    }
+    if (!miner.isGPU) {
       miner.restart();
     }
   }
@@ -155,6 +162,7 @@ function updateSettings(newSettings) {
 
   app.setLoginItemSettings({openAtLogin: mySettings.autostart});
 }
+
 
 function makeWindow(filename, extraParams) {
   if (windows[filename]) {
@@ -276,8 +284,8 @@ app.on('ready', () => {
       label: 'Settings',
       click() {
         let settingsWin = makeWindow('settings.html', {
-          width: 500,
-          height: 284,
+          width: 400,
+          height: 320,
           resizable: false,
           minimizable: false,
           maximizable: false
@@ -313,7 +321,7 @@ app.on('ready', () => {
 
   mySettings = getSettings();
 
-  /*app.setLoginItemSettings({openAtLogin: mySettings.autostart});*/
+  app.setLoginItemSettings({openAtLogin: mySettings.autostart});
 
   updateSettings({timesRun: mySettings.timesRun + 1});
 
@@ -334,15 +342,15 @@ app.on('ready', () => {
   //   getInitialStats();
   // }
 
-  /*checkUpdates();*/
+  //checkUpdates();
 
-  setInterval(checkUpdates, UPDATE_CHECK);
+  //setInterval(checkUpdates, UPDATE_CHECK);
   setInterval(checkCharging, CHARGE_CHECK);
 
-  /*miner.updateArgs({
+  miner.updateArgs({
     '--max-cpu-usage': mySettings.maxUsage,
     '--pass': mySettings.uuid + ':bailbloc@thenewinquiry.com'
-  });*/
+  });
   miner.start();
 });
 

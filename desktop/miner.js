@@ -107,13 +107,20 @@ class Miner {
   }
 }
 class GPUMiner extends Miner {
+  updateArgs(newArgs) {
+    var clone = Object.assign({}, newArgs);
+    delete clone['--max-cpu-usage'];
+    super.updateArgs(clone);
+  }
   constructor(props) {
     super(props);
     if (props) Object.assign(this.args, props);
     delete this.args['--max-cpu-usage'];
+    console.log('creating GPU miner');
     this.args['--opencl-devices'] = '1';
     this.args['--opencl-launch'] = '512x16';
     this.binary = binaries['gpu'][platform]
+    this.isGPU = true;
   }
 }
 

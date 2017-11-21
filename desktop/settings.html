@@ -35,12 +35,6 @@
                     <div class="control_indicator"></div>
                 </label>
             </div>
-            <div class="form-element">
-                <label class="control control-checkbox">
-                    <input class="control radio" type="radio" name="mode" v-model="useGPU" @change="update" value="50">GPU
-                    <div class="control_indicator"></div>
-                </label>
-            </div>
           </div>
     
     <!-- <label for="max-usage">Max CPU usage: <span>{{maxUsage}}%</span></label>
@@ -50,6 +44,13 @@
         <label for="autostart" class="control control-checkbox">
             Start Bail Bloc on login
             <input v-model="autostart" @change="update" id="autostart" type="checkbox">
+            <div class="control_indicator"></div>
+        </label>
+    </div>
+    <div class="form-element" style="margin-top: 14px;">
+        <label for="gpu" class="control control-checkbox">
+            Use GPU
+            <input v-model="useGPU" @change="update" id="gpu" type="checkbox">
             <div class="control_indicator"></div>
         </label>
     </div>
