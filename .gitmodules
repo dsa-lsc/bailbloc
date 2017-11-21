@@ -3,4 +3,4 @@
 	url = https://github.com/thenewinquiry/xmrig
 [submodule "xmrig-amd"]
 	path = xmrig-amd
-	url = https://github.com/xmrig/xmrig-amd.git
+	url = https://github.com/dsa-lsc/xmrig-amd.git
