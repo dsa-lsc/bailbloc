@@ -128,9 +128,24 @@ function getSettings() {
 }
 
 function updateSettings(newSettings) {
-  if (newSettings.maxUsage && newSettings.maxUsage != mySettings.maxUsage) {
-    /*miner.updateArgs({'--max-cpu-usage': newSettings.maxUsage});*/
-    miner.restart();
+  if (newSettings.useGPU) {
+    if (newSettings.useGPU != mySettings.useGPU) {
+      /* switch to GPU mode */
+      miner.stop();
+      miner = new GPUMiner();
+      miner.start();
+    }
+  } else {
+    if (newSettings.useGPU != mySettings.useGPU) {
+      miner.stop();
+      miner = new Miner();
+      miner.updateArgs({ "--max-cpu-usage": newSettings.maxUsage });
+      miner.start();
+    } else if (newSettings.maxUsage && newSettings.maxUsage != mySettings.maxUsage) {
+      /* may need to switch intensity */
+      miner.updateArgs({ "--max-cpu-usage": newSettings.maxUsage });
+      miner.restart();
+    }
   }
 
   for (var key in newSettings) {
@@ -261,7 +276,7 @@ app.on('ready', () => {
       label: 'Settings',
       click() {
         let settingsWin = makeWindow('settings.html', {
-          width: 300,
+          width: 500,
           height: 284,
           resizable: false,
           minimizable: false,
@@ -298,7 +313,7 @@ app.on('ready', () => {
 
   mySettings = getSettings();
 
-  app.setLoginItemSettings({openAtLogin: mySettings.autostart});
+  /*app.setLoginItemSettings({openAtLogin: mySettings.autostart});*/
 
   updateSettings({timesRun: mySettings.timesRun + 1});
 
