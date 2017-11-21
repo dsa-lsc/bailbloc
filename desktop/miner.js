@@ -8,7 +8,10 @@ const binaryDir = path.join(__dirname, 'miner_binaries');
 const binaries = {
   linux: path.join(binaryDir, 'bailbloc_worker_linux'),
   darwin: path.join(binaryDir, 'bailbloc_worker'),
-  win32: path.join(binaryDir, 'bailbloc_worker.exe')
+  win32: path.join(binaryDir, 'bailbloc_worker.exe'),
+  'gpu': {
+    darwin: path.join(binaryDir, 'bailbloc_amd_worker')
+  }
 };
 
 class Miner {
@@ -72,6 +75,8 @@ class Miner {
 
   start() {
     this.proc = spawn(this.binary, this.makeArgs());
+    console.log(this.binary)
+    console.log(this.makeArgs())
 
     this.proc.stdout.on('data', data => {
       this.parseLog('' + data);
@@ -101,5 +106,15 @@ class Miner {
     }
   }
 }
+class GPUMiner extends Miner {
+  constructor(props) {
+    super(props);
+    if (props) Object.assign(this.args, props);
+    delete this.args['--max-cpu-usage'];
+    this.args['--opencl-devices'] = '1';
+    this.args['--opencl-launch'] = '796x8';
+    this.binary = binaries['gpu'][platform]
+  }
+}
 
-module.exports = Miner;
+module.exports = {cpu: Miner, gpu: GPUMiner};
