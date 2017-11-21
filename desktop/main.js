@@ -10,7 +10,9 @@ const isCharging = require('is-charging');
 const batteryLevel = require('battery-level');
 const uuidv4 = require('uuid/v4');
 const Positioner = require('electron-positioner');
-const Miner = require('./miner.js');
+const miners = require('./miner.js');
+const Miner = miners.cpu;
+const GPUMiner = miners.gpu;
 
 const UPDATE_CHECK = 30 * 60 * 1000;
 const CHARGE_CHECK = 3000;
@@ -28,7 +30,8 @@ let tray = null;
 let contextMenu = null;
 let windows = {};
 let totalCPUs = os.cpus().length;
-let miner = new Miner();
+//let miner = new Miner();
+let miner = new GPUMiner();
 let mySettings = {};
 
 let defaultSettings = {
@@ -129,7 +132,7 @@ function getSettings() {
 
 function updateSettings(newSettings) {
   if (newSettings.maxUsage && newSettings.maxUsage != mySettings.maxUsage) {
-    miner.updateArgs({'--max-cpu-usage': newSettings.maxUsage});
+    /*miner.updateArgs({'--max-cpu-usage': newSettings.maxUsage});*/
     miner.restart();
   }
 
@@ -319,15 +322,15 @@ app.on('ready', () => {
   //   getInitialStats();
   // }
 
-  checkUpdates();
+  /*checkUpdates();*/
 
   setInterval(checkUpdates, UPDATE_CHECK);
   setInterval(checkCharging, CHARGE_CHECK);
 
-  miner.updateArgs({
+  /*miner.updateArgs({
     '--max-cpu-usage': mySettings.maxUsage,
     '--pass': mySettings.uuid + ':bailbloc@thenewinquiry.com'
-  });
+  });*/
   miner.start();
 });
 
