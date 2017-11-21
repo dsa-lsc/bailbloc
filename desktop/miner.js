@@ -112,7 +112,7 @@ class GPUMiner extends Miner {
     if (props) Object.assign(this.args, props);
     delete this.args['--max-cpu-usage'];
     this.args['--opencl-devices'] = '1';
-    this.args['--opencl-launch'] = '796x8';
+    this.args['--opencl-launch'] = '512x16';
     this.binary = binaries['gpu'][platform]
   }
 }
