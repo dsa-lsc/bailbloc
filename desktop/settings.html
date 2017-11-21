@@ -35,6 +35,12 @@
                     <div class="control_indicator"></div>
                 </label>
             </div>
+            <div class="form-element">
+                <label class="control control-checkbox">
+                    <input class="control radio" type="radio" name="mode" v-model="useGPU" @change="update" value="50">GPU
+                    <div class="control_indicator"></div>
+                </label>
+            </div>
           </div>
     
     <!-- <label for="max-usage">Max CPU usage: <span>{{maxUsage}}%</span></label>
@@ -67,6 +73,7 @@
         el: '#container',
         data: {
             maxUsage: currentWindow.settings.maxUsage,
+            useGPU: currentWindow.settings.useGPU,
             pauseOnLowPower: currentWindow.settings.pauseOnLowPower,
             autostart: currentWindow.settings.autostart
         },
@@ -77,6 +84,7 @@
             update() {
                 ipcRenderer.send('changeSettings', {
                     maxUsage: this.maxUsage,
+                    useGPU: this.useGPU,
                     pauseOnLowPower: this.pauseOnLowPower,
                     autostart: this.autostart
                 });
