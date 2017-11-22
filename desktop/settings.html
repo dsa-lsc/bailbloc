@@ -61,6 +61,7 @@
             <div class="control_indicator"></div>
         </label>
     </div>
+    <div>{{ speed }}</div>
     <button @click="close" style="margin-top: 16px;">Done</button>
     </form>
     </div>
@@ -76,7 +77,8 @@
             maxUsage: currentWindow.settings.maxUsage,
             useGPU: currentWindow.settings.useGPU,
             pauseOnLowPower: currentWindow.settings.pauseOnLowPower,
-            autostart: currentWindow.settings.autostart
+            autostart: currentWindow.settings.autostart,
+            speed: 0
         },
         methods: {
             close() {
@@ -89,9 +91,14 @@
                     pauseOnLowPower: this.pauseOnLowPower,
                     autostart: this.autostart
                 });
-            }
+            },
         }
     });
+    ipcRenderer.on('changeSpeed', (event, arg) => {
+        app.speed = arg;
+    });
+
+    ipcRenderer.send('newSettings', 1);
     </script>
 </body>
 
