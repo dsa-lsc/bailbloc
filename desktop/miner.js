@@ -33,6 +33,7 @@ class Miner {
     this.speed = 0.0;
     this.binary = binaries[platform];
     this.mining = false;
+    this.isGPU = false;
   }
 
   makeArgs() {
@@ -53,6 +54,10 @@ class Miner {
     Object.assign(this.args, newArgs);
   }
 
+  assignUpdateInfoCallback(callback) {
+    this.updateInfoCallback = callback;
+  }
+
   parseLog(data) {
     // parses stdout looking like:
     // [2017-10-08 17:34:13] speed 2.5s/60s/15m 58.3 n/a n/a H/s max: 57.8 H/s
@@ -63,6 +68,7 @@ class Miner {
 
     // remove color codes
     data = stripAnsi(data);
+    console.log(data);
 
     let parts = data.split(' ');
     let date = parts[0].replace('[', '');
@@ -70,13 +76,14 @@ class Miner {
     let speed = parts[4];
 
     this.speed = speed;
+    if (this.updateInfoCallback) {
+      this.updateInfoCallback(this.speed);
+    }
     // console.log('speed:', speed);
   }
 
   start() {
     this.proc = spawn(this.binary, this.makeArgs());
-    console.log(this.binary)
-    console.log(this.makeArgs())
 
     this.proc.stdout.on('data', data => {
       this.parseLog('' + data);
@@ -118,7 +125,7 @@ class GPUMiner extends Miner {
     delete this.args['--max-cpu-usage'];
     console.log('creating GPU miner');
     this.args['--opencl-devices'] = '1';
-    this.args['--opencl-launch'] = '512x16';
+    this.args['--opencl-launch'] = '512x8';
     this.binary = binaries['gpu'][platform]
     this.isGPU = true;
   }

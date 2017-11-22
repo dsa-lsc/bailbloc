@@ -25,6 +25,19 @@ if (isSecondInstance) {
   app.quit();
 }
 
+settingsUpdater = {
+  updateSpeed: function (speed) {
+    return;
+  },
+};
+ipcMain.on("newSettings", (event, arg) => {
+  settingsUpdater.updateSpeed = (speed) => {
+    if (!event.sender.isDestroyed()) {
+      console.log(speed);
+      event.sender.send("changeSpeed", speed);
+    }
+  };
+});
 let activeTrayImage, passiveTrayImage;
 let tray = null;
 let contextMenu = null;
@@ -34,6 +47,7 @@ let miner = new Miner();
 let mySettings = {};
 
 let defaultSettings = {
+  speed: 0,
   maxUsage: 10,
   autostart: true,
   useGPU: false,
@@ -53,6 +67,7 @@ if (platform === 'darwin') {
   activeTrayImage = path.join(__dirname, 'assets', 'mac-icon.png');
   passiveTrayImage = path.join(__dirname, 'assets', 'mac-fade_icon.png');
 }
+
 
 function toggleMiner(e) {
   if (miner.mining) {
@@ -131,27 +146,32 @@ function getSettings() {
 }
 
 function updateSettings(newSettings) {
-
   if ("useGPU" in newSettings) {
     if (newSettings.useGPU) {
       if (newSettings.useGPU != mySettings.useGPU) {
         /* switch to GPU mode */
         miner.stop();
         miner = new GPUMiner();
+miner.assignUpdateInfoCallback((speed) => {
+  settingsUpdater.updateSpeed(speed);
+});
         miner.start();
       }
     } else if (newSettings.useGPU != mySettings.useGPU) {
       /* switch off gpu mode */
       miner.stop();
       miner = new Miner();
-      miner.updateArgs({'--max-cpu-usage': newSettings.maxUsage});
+      miner.updateArgs({ "--max-cpu-usage": newSettings.maxUsage });
+miner.assignUpdateInfoCallback((speed) => {
+  settingsUpdater.updateSpeed(speed);
+});
       miner.start();
     }
   }
 
   if ("maxUsage" in newSettings) {
     if (newSettings.maxUsage != mySettings.maxUsage) {
-      miner.updateArgs({"--max-cpu-usage": newSettings.maxUsage});
+      miner.updateArgs({ "--max-cpu-usage": newSettings.maxUsage });
     }
     if (!miner.isGPU) {
       miner.restart();
@@ -163,7 +183,7 @@ function updateSettings(newSettings) {
     settings.set(key, newSettings[key]);
   }
 
-  app.setLoginItemSettings({openAtLogin: mySettings.autostart});
+  app.setLoginItemSettings({ openAtLogin: mySettings.autostart });
 }
 
 
@@ -368,3 +388,13 @@ app.on('window-all-closed', () => {
 ipcMain.on('changeSettings', (event, arg) => {
   updateSettings(arg);
 });
+
+let minerReference = {'miner': miner};
+
+
+miner.assignUpdateInfoCallback((speed) => {
+  settingsUpdater.updateSpeed(speed);
+});
+
+/* the miner just has to call a function with its current speed */
+/* that function should send a message to whatever the current settings menu is */
